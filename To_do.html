@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do App</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: lavender;
+    color: rgb(95, 44, 3);
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* Added positioning for the container */
+  }
+  .settings {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: rgb(70, 5, 73);
+    cursor: pointer;
+  }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    font-family: Calibri, sans-serif;
+    font-size: 14px;
+  }
+  .dropdown-content a {
+    color: black;
+    padding: 8px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  .dropdown-content a:hover {
+    background-color: #f1f1f1;
+  }
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+  .dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+  }
+  h1 {
+    text-align: center;
+    display: flex;
+    align-items: center; /* Align items vertically */
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+  }
+  .completed {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: purple;
+    color: white;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><span style="color: purple;">🔍</span> To-do <span class="dropdown">
+    <span class="settings">Settings <span class="dots">...</span>
+    <div class="dropdown-content">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Help</a>
+      <a href="#">Feedback</a>
+      <!-- Add more options as needed -->
+    </div>
+  </span></h1>
+  <input type="text" id="taskInput" placeholder="Add new task...">
+  <button onclick="addTask()">Add Task</button>
+  <ul id="taskList"></ul>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    loadTasks();
+  });
+
+  function addTask() {
+    var input = document.getElementById("taskInput");
+    var task = input.value.trim();
+    if (task !== "") {
+      var tasks = getTasks();
+      tasks.push({ name: task, completed: false });
+      saveTasks(tasks);
+      renderTasks();
+      input.value = "";
+    }
+  }
+
+  function toggleTask(index) {
+    var tasks = getTasks();
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks(tasks);
+    renderTasks();
+  }
+
+  function deleteTask(index) {
+    var tasks = getTasks();
+    tasks.splice(index, 1);
+    saveTasks(tasks);
+    renderTasks();
+  }
+
+  function renderTasks() {
+    var tasks = getTasks();
+    var list = document.getElementById("taskList");
+    list.innerHTML = "";
+    tasks.forEach(function(task, index) {
+      var li = document.createElement("li");
+      li.textContent = task.name;
+      if (task.completed) {
+        li.classList.add("completed");
+      }
+      li.addEventListener("click", function() {
+        toggleTask(index);
+      });
+      li.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+        deleteTask(index);
+      });
+      list.appendChild(li);
+    });
+  }
+
+  function getTasks() {
+    var tasksString = localStorage.getItem("tasks");
+    return tasksString ? JSON.parse(tasksString) : [];
+  }
+
+  function saveTasks(tasks) {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+
+  function loadTasks() {
+    renderTasks();
+  }
+
+  // Function to handle search when clicking on search icon
+  document.querySelector('.container h1 span').addEventListener('click', function() {
+    var input = prompt('Enter a task to search:');
+    if (input !== null && input !== '') {
+      searchTasks(input);
+    }
+  });
+
+  // Function to search tasks
+  function searchTasks(query) {
+    var tasks = getTasks();
+    var filteredTasks = tasks.filter(function(task) {
+      return task.name.toLowerCase().includes(query.toLowerCase());
+    });
+    var list = document.getElementById("taskList");
+    list.innerHTML = "";
+    filteredTasks.forEach(function(task, index) {
+      var li = document.createElement("li");
+      li.textContent = task.name;
+      if (task.completed) {
+        li.classList.add("completed");
+      }
+      li.addEventListener("click", function() {
+        toggleTask(index);
+      });
+      li.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+        deleteTask(index);
+      });
+      list.appendChild(li);
+    });
+  }
+</script>
+</body>
+</html>
